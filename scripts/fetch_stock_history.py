@@ -13,6 +13,7 @@
 """
 import json
 import os
+import sys
 from datetime import datetime, timedelta
 import pandas as pd
 from pykrx import stock
@@ -87,6 +88,10 @@ def main():
             failed.append(code)
 
     print(f"완료: {success}/{len(codes)} 종목 저장, 실패 {len(failed)}개 {failed}")
+    # 실패가 있으면 CI에서 실패로 보이도록 종료 코드를 남긴다
+    # (테이블 미생성 등으로 전량 실패해도 print만 하고 exit 0이면 워크플로우가 조용히 "성공"으로 표시됨)
+    if failed:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
