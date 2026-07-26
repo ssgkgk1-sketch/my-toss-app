@@ -31,9 +31,13 @@ def get_client():
 
 
 def fetch_ranked_codes(client) -> list:
-    res = client.table("stock_ranking").select("gainers, losers").eq("id", 1).single().execute()
+    res = client.table("stock_ranking").select("gainers, losers, popular").eq("id", 1).single().execute()
     row = res.data or {}
-    codes = [s["code"] for s in row.get("gainers", [])] + [s["code"] for s in row.get("losers", [])]
+    codes = (
+        [s["code"] for s in row.get("gainers", [])]
+        + [s["code"] for s in row.get("losers", [])]
+        + [s["code"] for s in (row.get("popular") or [])]
+    )
     # 중복 제거, 순서 유지
     seen = set()
     unique_codes = []
