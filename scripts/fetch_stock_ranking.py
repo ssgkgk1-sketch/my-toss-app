@@ -39,20 +39,43 @@ def fetch_market_ranking(date: str, market: str) -> pd.DataFrame:
     df["market"] = market
     df["price"] = df["종가"]
     df["changeRate"] = df["등락률"]
+    df["open"] = df["시가"]
+    df["high"] = df["고가"]
+    df["low"] = df["저가"]
+    df["volume"] = df["거래량"]
     df = df[df["price"] > 0]
-    return df[["code", "name", "market", "price", "changeRate"]]
+    return df[["code", "name", "market", "price", "changeRate", "open", "high", "low", "volume"]]
+
+
+def fetch_market_extra(date: str, market: str) -> pd.DataFrame:
+    """시가총액 · PER — 종목별이 아니라 시장 전체 1회 조회 후 나중에 code로 병합한다."""
+    cap = stock.get_market_cap(date, market=market)[["시가총액"]]
+    fundamental = stock.get_market_fundamental(date, market=market)[["PER"]]
+    merged = cap.join(fundamental, how="left")
+    merged = merged.reset_index().rename(
+        columns={"티커": "code", "시가총액": "marketCap", "PER": "per"}
+    )
+    return merged[["code", "marketCap", "per"]]
 
 
 def build_ranking(date: str, top_n: int = 10) -> dict:
     kospi = fetch_market_ranking(date, "KOSPI")
     kosdaq = fetch_market_ranking(date, "KOSDAQ")
     all_stocks = pd.concat([kospi, kosdaq], ignore_index=True)
+
+    extra_kospi = fetch_market_extra(date, "KOSPI")
+    extra_kosdaq = fetch_market_extra(date, "KOSDAQ")
+    extra = pd.concat([extra_kospi, extra_kosdaq], ignore_index=True)
+    all_stocks = all_stocks.merge(extra, on="code", how="left")
+
     gainers = all_stocks.sort_values("changeRate", ascending=False).head(top_n)
     losers = all_stocks.sort_values("changeRate", ascending=True).head(top_n)
 
     def to_records(df: pd.DataFrame) -> list:
         records = []
         for rank, row in enumerate(df.itertuples(index=False), start=1):
+            per = row.per
+            market_cap = row.marketCap
             records.append({
                 "rank": rank,
                 "code": row.code,
@@ -60,6 +83,13 @@ def build_ranking(date: str, top_n: int = 10) -> dict:
                 "market": row.market,
                 "price": int(row.price),
                 "changeRate": round(float(row.changeRate), 2),
+                "open": int(row.open),
+                "high": int(row.high),
+                "low": int(row.low),
+                "volume": int(row.volume),
+                "marketCap": int(market_cap) if pd.notna(market_cap) else None,
+                # PER 0 이하는 적자 기업 등 의미 없는 값이라 None(= "-" 표시) 처리
+                "per": round(float(per), 2) if pd.notna(per) and per > 0 else None,
             })
         return records
 

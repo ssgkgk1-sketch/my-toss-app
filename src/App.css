@@ -22,8 +22,7 @@
   min-height: 100vh;
   background-color: #0a0a0a;
   color: #ffffff;
-  font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Noto Sans KR",
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Noto Sans KR", sans-serif;
 }
 
 /* ── 헤더 ── */
@@ -56,37 +55,32 @@
   color: #6e6e6e;
 }
 
-/* ── 세그먼트 (상승/하락) ── */
-.seg-wrap {
-  display: flex;
-  gap: 6px;
+/* ── ▶ TDS SegmentedControl 래퍼 ── */
+.seg-tds-wrap {
   margin-bottom: 12px;
 }
 
-.seg-btn {
-  flex: 1;
-  height: 38px;
-  border: none;
-  border-radius: 8px;
-  background-color: #1a1a1a;
-  color: #888888;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.15s, color 0.15s;
+/*
+ * TDS SegmentedControl 내부 구조:
+ *   [role="radiogroup"]
+ *     > div:nth-child(1)  → 리플 레이어 (투명 배경)
+ *     > div:nth-child(2)  → 슬라이딩 인디케이터 (← 실제 활성 탭 배경)
+ *     > div[aria-selected="true"]   → 활성 탭 컨테이너 (투명)
+ *     > div[aria-selected="false"]  → 비활성 탭 컨테이너 (투명)
+ * role="radio" + aria-checked="true" 인 input은 시각적으로 숨겨진 요소라 CSS로 배경 변경 불가.
+ */
+
+/* 상승 탭: 활성 인디케이터 빨강 */
+.seg-tds-wrap.seg-rise [role="radiogroup"] > div:nth-child(2) {
+  background-color: #ff3b30 !important;
 }
 
-.seg-rise-active {
-  background-color: rgba(255, 59, 48, 0.15);
-  color: #ff3b30;
+/* 하락 탭: 활성 인디케이터 파랑 */
+.seg-tds-wrap.seg-fall [role="radiogroup"] > div:nth-child(2) {
+  background-color: #007aff !important;
 }
 
-.seg-fall-active {
-  background-color: rgba(0, 122, 255, 0.15);
-  color: #007aff;
-}
-
-/* ── 필터 칩 ── */
+/* ── 커스텀 필터 칩 (TDS 대응 없음) ── */
 .chip-row {
   display: flex;
   gap: 6px;
@@ -122,31 +116,11 @@
   background-color: #111111;
 }
 
-.col-rank {
-  width: 32px;
-  font-size: 11px;
-  color: #555555;
-  font-weight: 500;
-  text-align: center;
-  flex-shrink: 0;
-}
+.col-rank  { width: 32px; font-size: 11px; color: #555; font-weight: 500; text-align: center; flex-shrink: 0; }
+.col-name  { flex: 1; font-size: 11px; color: #555; font-weight: 500; padding-left: 12px; }
+.col-price { font-size: 11px; color: #555; font-weight: 500; text-align: right; }
 
-.col-name {
-  flex: 1;
-  font-size: 11px;
-  color: #555555;
-  font-weight: 500;
-  padding-left: 12px;
-}
-
-.col-price {
-  font-size: 11px;
-  color: #555555;
-  font-weight: 500;
-  text-align: right;
-}
-
-/* ── 종목 리스트 ── */
+/* ── 종목 리스트 컨테이너 ── */
 .list {
   flex: 1;
   display: flex;
@@ -160,19 +134,33 @@
   font-size: 14px;
 }
 
-.stock-row {
-  display: flex;
-  align-items: center;
-  padding: 14px 20px;
-  border-bottom: 1px solid #161616;
-  transition: background-color 0.1s;
+/* ── ▶ TDS List/ListRow 다크 오버라이드 ── */
+.stock-list-tds {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
-.stock-row:active {
-  background-color: #141414;
+/* ListRow 배경을 투명하게 → 화면 배경(#0a0a0a) 표시 */
+.stock-list-tds li {
+  background-color: transparent !important;
 }
 
-/* 순위 */
+/* ListRow 구분선 색상을 다크 테마에 맞게 */
+.stock-list-tds li::before,
+.stock-list-tds li > hr,
+.stock-list-tds li [class*="hairline"],
+.stock-list-tds li [class*="border"] {
+  border-color: #1e1e1e !important;
+  background-color: #1e1e1e !important;
+}
+
+/* ListRow 터치 효과 오버라이드 */
+.stock-list-tds li:active {
+  background-color: #141414 !important;
+}
+
+/* ── 종목 행 내부 콘텐츠 (커스텀 스타일 유지) ── */
 .rank {
   width: 32px;
   font-size: 15px;
@@ -182,10 +170,8 @@
   flex-shrink: 0;
 }
 
-/* 종목 정보 */
 .stock-info {
   flex: 1;
-  padding-left: 12px;
   min-width: 0;
 }
 
@@ -206,22 +192,10 @@
   margin-top: 2px;
 }
 
-.stock-code {
-  font-size: 12px;
-  color: #555555;
-}
+.stock-code   { font-size: 12px; color: #555555; }
+.meta-dot     { font-size: 12px; color: #3a3a3a; }
+.stock-market { font-size: 12px; color: #555555; }
 
-.meta-dot {
-  font-size: 12px;
-  color: #3a3a3a;
-}
-
-.stock-market {
-  font-size: 12px;
-  color: #555555;
-}
-
-/* 가격/등락률 */
 .stock-price-col {
   display: flex;
   flex-direction: column;
@@ -230,15 +204,35 @@
   flex-shrink: 0;
 }
 
-.stock-price {
-  font-size: 15px;
-  font-weight: 600;
-  color: #f0f0f0;
+.stock-price { font-size: 15px; font-weight: 600; color: #f0f0f0; }
+.stock-rate  { font-size: 13px; font-weight: 600; }
+
+/* ── 로딩 / 에러 상태 ── */
+.state-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  gap: 12px;
 }
 
-.stock-rate {
-  font-size: 13px;
-  font-weight: 600;
+.state-text  { margin: 0; font-size: 14px; color: #666666; }
+.state-sub   { margin: 0; font-size: 12px; color: #444444; text-align: center; word-break: break-all; }
+.error-text  { color: #ff453a; }
+
+.spinner {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border: 2px solid #2a2a2a;
+  border-top-color: #888888;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* ── 하단 면책 문구 ── */

@@ -5,10 +5,14 @@ on:
     # 한국 장중(09:00~15:30 KST)에 5분마다 실행
     # KST = UTC+9 이므로 UTC 기준 00:00~06:30
     - cron: '*/5 0-6 * * 1-5'
+    # 한국 장마감 후(16:30 KST) 하루 1회, 종목별 5년 일봉 히스토리 갱신
+    # KST = UTC+9 이므로 UTC 기준 07:30
+    - cron: '30 7 * * 1-5'
   workflow_dispatch:  # 수동 실행 버튼도 추가
 
 jobs:
-  fetch:
+  fetch-ranking:
+    if: github.event.schedule != '30 7 * * 1-5'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -32,3 +36,29 @@ jobs:
         run: |
           cd scripts
           python3 fetch_stock_ranking.py
+
+  fetch-history:
+    if: github.event.schedule == '30 7 * * 1-5' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r scripts/requirements.txt
+
+      - name: Run script
+        env:
+          KRX_ID: ${{ secrets.KRX_ID }}
+          KRX_PW: ${{ secrets.KRX_PW }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: |
+          cd scripts
+          python3 fetch_stock_history.py

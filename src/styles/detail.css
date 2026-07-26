@@ -1,0 +1,234 @@
+/* ── 상세 화면 전체 ── */
+.detail-screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #0a0a0a;
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Noto Sans KR", sans-serif;
+}
+
+/* ── 헤더 (커스텀 — NavigationBar는 네이티브 SDK 전용) ── */
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 16px 12px;
+  background-color: #0a0a0a;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  border-radius: 8px;
+  transition: background-color 0.1s;
+}
+.back-btn:active { background-color: #1a1a1a; }
+
+.detail-header-name {
+  flex: 1;
+  font-size: 17px;
+  font-weight: 600;
+  color: #f0f0f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
+.star-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
+  color: #555555;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  border-radius: 8px;
+  transition: background-color 0.1s;
+}
+.star-btn:active { background-color: #1a1a1a; }
+.star-btn-active { color: #ffd60a; }
+
+/* ── 가격 섹션 ── */
+.price-section {
+  padding: 20px 20px 0;
+}
+
+.ticker-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.ticker-code   { font-size: 13px; color: #666666; }
+.ticker-dot    { font-size: 13px; color: #333333; }
+.ticker-market { font-size: 13px; color: #666666; }
+
+.price-main {
+  font-size: 34px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.price-unit {
+  font-size: 20px;
+  font-weight: 500;
+  color: #888888;
+  margin-right: 2px;
+}
+
+.price-change-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.change-rate  { font-size: 17px; font-weight: 600; }
+.change-label { font-size: 13px; color: #555555; }
+
+/* ── ▶ TDS Tab 래퍼 (기간: 일/주/월/년) ── */
+.period-tab-tds {
+  margin-top: 20px;
+  /* Tab 하단 보더를 다크 테마에 맞게 */
+  border-bottom: 1px solid #1e1e1e;
+}
+
+/* TDS Tab 내부 선택 인디케이터 색상 오버라이드 */
+.period-tab-tds [role="tablist"] {
+  background: transparent;
+}
+
+/* 선택된 탭 언더라인 → 흰색으로 */
+.period-tab-tds [role="tab"][aria-selected="true"] {
+  color: #ffffff !important;
+}
+.period-tab-tds [role="tab"][aria-selected="true"]::after {
+  background-color: #ffffff !important;
+}
+
+/* 비선택 탭 텍스트 */
+.period-tab-tds [role="tab"][aria-selected="false"] {
+  color: #555555 !important;
+}
+
+/* ── 차트 영역 ── */
+.chart-area {
+  background-color: #0d0d0d;
+  padding: 8px 0 0;
+}
+
+.chart-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 160px;
+  font-size: 13px;
+  color: #555555;
+}
+
+.chart-state-error { color: #ff453a; }
+
+.spinner-sm {
+  display: block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #2a2a2a;
+  border-top-color: #888888;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── 지표 그리드 (커스텀 유지 — 6셀 3열 구성) ── */
+.stats-section {
+  padding: 20px;
+  border-top: 1px solid #1a1a1a;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 0;
+  border-bottom: 1px solid #1a1a1a;
+}
+.stat-item:nth-child(n+4) { border-bottom: none; }
+
+.stat-label      { font-size: 11px; color: #555555; font-weight: 400; }
+.stat-value      { font-size: 14px; color: #e0e0e0; font-weight: 500; }
+.stat-value-muted { color: #444444; }
+
+/* ── ▶ TDS Button 래퍼 (관심종목 추가) ── */
+.watchlist-btn-wrap {
+  padding: 16px 20px;
+  border-top: 1px solid #1a1a1a;
+}
+
+/* TDS Button(dark/weak)을 다크 테마에 맞게 미세 조정 */
+.watchlist-btn-wrap button {
+  border-radius: 12px !important;
+  font-size: 16px !important;
+}
+
+/* ── 면책 문구 ── */
+.detail-footer {
+  padding: 16px 20px 32px;
+  text-align: center;
+  font-size: 11px;
+  color: #333333;
+  border-top: 1px solid #141414;
+  line-height: 1.6;
+}
+
+/* ── 에러 / 빈 상태 ── */
+.detail-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 16px;
+  padding: 60px 24px;
+}
+
+.detail-fallback p      { margin: 0; font-size: 15px; color: #666666; }
+.detail-fallback button {
+  padding: 10px 24px;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  color: #f0f0f0;
+  font-size: 14px;
+  cursor: pointer;
+}
