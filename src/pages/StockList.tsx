@@ -5,7 +5,7 @@ import { supabase } from "../lib/supabase";
 import { type Stock, type StockRankingRow, type Market } from "../data/stocks";
 import "../App.css";
 
-type Tab = "rise" | "fall";
+type Tab = "rise" | "fall" | "popular";
 type Filter = "all" | Market;
 
 const MARKET_LABELS: Record<Market, string> = {
@@ -41,11 +41,21 @@ export default function StockList() {
     async function fetchRanking() {
       setLoading(true);
       setError(null);
-      const { data: rows, error: err } = await supabase
+      let { data: rows, error: err } = await supabase
         .from("stock_ranking")
-        .select("id, base_date, updated_at, gainers, losers")
+        .select("id, base_date, updated_at, gainers, losers, popular")
         .eq("id", 1)
         .single();
+
+      // popular 컬럼을 아직 추가하지 않은 환경(마이그레이션 전)을 위한 하위 호환 재시도
+      if (err && err.message?.includes("popular")) {
+        ({ data: rows, error: err } = await supabase
+          .from("stock_ranking")
+          .select("id, base_date, updated_at, gainers, losers")
+          .eq("id", 1)
+          .single());
+      }
+
       if (cancelled) return;
       if (err) setError(err.message);
       else setData(rows as StockRankingRow);
@@ -58,7 +68,9 @@ export default function StockList() {
 
   const baseList: Stock[] = useMemo(() => {
     if (!data) return [];
-    return tab === "rise" ? data.gainers : data.losers;
+    if (tab === "rise") return data.gainers;
+    if (tab === "fall") return data.losers;
+    return data.popular ?? [];
   }, [data, tab]);
 
   const filtered = useMemo(
@@ -82,7 +94,7 @@ export default function StockList() {
           {refTime && <span className="ref-time">{refTime}</span>}
         </div>
 
-        {/* ▶ TDS SegmentedControl — 상승/하락 */}
+        {/* ▶ TDS SegmentedControl — 상승/하락/인기 */}
         <div className={`seg-tds-wrap seg-${tab}`}>
           <SegmentedControl
             value={tab}
@@ -91,6 +103,7 @@ export default function StockList() {
           >
             <SegmentedControl.Item value="rise">상승</SegmentedControl.Item>
             <SegmentedControl.Item value="fall">하락</SegmentedControl.Item>
+            <SegmentedControl.Item value="popular">인기</SegmentedControl.Item>
           </SegmentedControl>
         </div>
 

@@ -22,6 +22,8 @@ export interface StockRankingRow {
   updated_at: string;  // ISO 8601
   gainers: Stock[];
   losers: Stock[];
+  /** 시가총액 TOP20 — stock_ranking 테이블에 popular 컬럼 추가 전에는 undefined일 수 있음 */
+  popular?: Stock[];
 }
 
 /** stock_history 테이블의 일별 종가 한 점 */

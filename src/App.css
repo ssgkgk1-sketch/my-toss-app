@@ -80,6 +80,11 @@
   background-color: #007aff !important;
 }
 
+/* 인기(시가총액 TOP20) 탭: 활성 인디케이터는 브랜드 컬러 — 상승/하락과 구분되는 방향성 없는 색 */
+.seg-tds-wrap.seg-popular [role="radiogroup"] > div:nth-child(2) {
+  background-color: #ff8a65 !important;
+}
+
 /* ── 커스텀 필터 칩 (TDS 대응 없음) ── */
 .chip-row {
   display: flex;

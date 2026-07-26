@@ -58,7 +58,7 @@ def fetch_market_extra(date: str, market: str) -> pd.DataFrame:
     return merged[["code", "marketCap", "per"]]
 
 
-def build_ranking(date: str, top_n: int = 10) -> dict:
+def build_ranking(date: str, top_n: int = 10, popular_n: int = 20) -> dict:
     kospi = fetch_market_ranking(date, "KOSPI")
     kosdaq = fetch_market_ranking(date, "KOSDAQ")
     all_stocks = pd.concat([kospi, kosdaq], ignore_index=True)
@@ -70,6 +70,8 @@ def build_ranking(date: str, top_n: int = 10) -> dict:
 
     gainers = all_stocks.sort_values("changeRate", ascending=False).head(top_n)
     losers = all_stocks.sort_values("changeRate", ascending=True).head(top_n)
+    # "인기" 탭 — 시가총액 상위 종목 (대형 우량주는 등락률 TOP에 거의 안 나오므로 별도로 노출)
+    popular = all_stocks.dropna(subset=["marketCap"]).sort_values("marketCap", ascending=False).head(popular_n)
 
     def to_records(df: pd.DataFrame) -> list:
         records = []
@@ -98,6 +100,7 @@ def build_ranking(date: str, top_n: int = 10) -> dict:
         "updatedAt": datetime.now().isoformat(),
         "gainers": to_records(gainers),
         "losers": to_records(losers),
+        "popular": to_records(popular),
     }
 
 
@@ -116,6 +119,7 @@ def upload_to_supabase(result: dict):
         "updated_at": result["updatedAt"],
         "gainers": result["gainers"],
         "losers": result["losers"],
+        "popular": result["popular"],
     }).execute()
 
     print("Supabase 업로드 완료.")
@@ -131,7 +135,10 @@ def main():
         json.dump(result, f, ensure_ascii=False, indent=2)
 
     print(f"저장 완료: {output_path}")
-    print(f"상승 TOP{len(result['gainers'])} / 하락 TOP{len(result['losers'])}")
+    print(
+        f"상승 TOP{len(result['gainers'])} / 하락 TOP{len(result['losers'])} "
+        f"/ 인기(시가총액) TOP{len(result['popular'])}"
+    )
 
     upload_to_supabase(result)
 
